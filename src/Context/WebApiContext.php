@@ -382,4 +382,13 @@ class WebApiContext implements ApiClientAwareContext
 
         return $this->client;
     }
+
+    protected function getResponse()
+    {
+        if (! $this->response) {
+            throw new \Exception("You must first make a request to check a response.");
+        }
+
+        return $this->response;
+    }
 }
