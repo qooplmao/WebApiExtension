@@ -181,6 +181,9 @@ class WebApiContext implements ApiClientAwareContext
         foreach ($fields as $key => $value) {
             $requestBody->setField($key, $value);
         }
+        if (!empty($this->headers)) {
+            $this->request->addHeaders($this->headers);
+        }
 
         $this->sendRequest();
     }
