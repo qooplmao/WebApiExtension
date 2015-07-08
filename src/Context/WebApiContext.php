@@ -361,7 +361,7 @@ class WebApiContext implements ApiClientAwareContext
         }
     }
 
-    private function sendRequest()
+    protected function sendRequest()
     {
         try {
             $this->response = $this->getClient()->send($this->request);
