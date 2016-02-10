@@ -68,6 +68,7 @@ class WebApiExtension implements ExtensionInterface
 
     private function loadClient(ContainerBuilder $container, $config)
     {
+        $config['base_uri'] = $config['base_url'];
         $definition = new Definition('GuzzleHttp\Client', array($config));
         $container->setDefinition(self::CLIENT_ID, $definition);
     }
