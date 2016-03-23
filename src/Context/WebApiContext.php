@@ -12,10 +12,9 @@ namespace Behat\WebApiExtension\Context;
 
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
+use Coduo\PHPMatcher\PHPUnit\PHPMatcherAssertions;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Psr7\Request as GuzzleRequest;
-use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit_Framework_Assert as Assertions;
 
@@ -26,25 +25,24 @@ use PHPUnit_Framework_Assert as Assertions;
  */
 class WebApiContext implements ApiClientAwareContext
 {
+    use PHPMatcherAssertions;
+
+    protected $authorizationPrefix = 'Basic';
+
     /**
      * @var string
      */
-    private $authorization;
+    protected $authorization;
 
     /**
      * @var ClientInterface
      */
-    private $client;
+    protected $client;
 
     /**
      * @var array
      */
     private $headers = array();
-
-    /**
-     * @var Request
-     */
-    private $request;
 
     /**
      * @var array
@@ -54,7 +52,7 @@ class WebApiContext implements ApiClientAwareContext
     /**
      * @var Response
      */
-    private $response;
+    protected $response;
 
     private $placeHolders = array();
 
@@ -78,7 +76,7 @@ class WebApiContext implements ApiClientAwareContext
     {
         $this->removeHeader('Authorization');
         $this->authorization = base64_encode($username . ':' . $password);
-        $this->addHeader('Authorization', 'Basic ' . $this->authorization);
+        $this->addHeader('Authorization', $this->authorizationPrefix .' ' . $this->authorization);
     }
 
     /**
@@ -201,7 +199,6 @@ class WebApiContext implements ApiClientAwareContext
     public function theResponseCodeShouldBe($code)
     {
         $expected = intval($code);
-        var_dump($this->response->getStatusCode());
         $actual = intval($this->response->getStatusCode());
         Assertions::assertSame($expected, $actual);
     }
@@ -264,6 +261,64 @@ class WebApiContext implements ApiClientAwareContext
     }
 
     /**
+     * Checks that response body contains JSON from PyString.
+     *
+     * Do not check that the response body /only/ contains the JSON from PyString,
+     *
+     * @param PyStringNode $jsonString
+     *
+     * @throws \RuntimeException
+     *
+     * @Then /^(?:the )?response should contain json matching:$/
+     */
+    public function theResponseShouldContainJsonMatching(PyStringNode $jsonString)
+    {
+        $etalon = json_decode($this->replacePlaceHolder($jsonString->getRaw()), true);
+        $actual = json_decode((string) $this->getResponse()->getBody(), true);
+
+        if (null === $etalon) {
+            throw new \RuntimeException(
+                "Can not convert etalon to json:\n" . $this->replacePlaceHolder($jsonString->getRaw())
+            );
+        }
+
+        $this->assertMatchesPattern($etalon, $actual);
+    }
+
+    /**
+     * Checks that response body contains JSON from PyString.
+     *
+     * Do not check that the response body /only/ contains the JSON from PyString,
+     *
+     * @param PyStringNode $jsonString
+     *
+     * @throws \RuntimeException
+     *
+     * @Then /^(?:the )?response should contain json with key "([^"]*)" matching:$/
+     */
+    public function theResponseShouldContainJsonWithKeyMatching($key, PyStringNode $jsonString)
+    {
+        $actual = json_decode((string) $this->getResponse()->getBody(), true);
+
+        Assertions::assertArrayHasKey($key, $actual);
+        $this->assertMatchesPattern($jsonString->getRaw(), $actual[$key]);
+    }
+
+    /**
+     * @Then the response should be json
+     */
+    public function theResponseIsJson()
+    {
+        $contentType = $this->getResponse()->getHeader('Content-Type');
+
+        if (!is_array($contentType)) {
+            $contentType = array($contentType);
+        }
+
+        Assertions::assertEquals('application/json', array_shift($contentType));
+    }
+
+    /**
      * Prints last response body.
      *
      * @Then print response
@@ -293,7 +348,7 @@ class WebApiContext implements ApiClientAwareContext
      *
      * @return string
      */
-    private function prepareUrl($url)
+    protected function prepareUrl($url)
     {
         return ltrim($this->replacePlaceHolder($url), '/');
     }
@@ -310,6 +365,19 @@ class WebApiContext implements ApiClientAwareContext
     public function setPlaceHolder($key, $value)
     {
         $this->placeHolders[$key] = $value;
+    }
+
+    /**
+     * Remove place holder for replacement.
+     *
+     * you can specify placeholders, which will
+     * be replaced in URL, request or response body.
+     *
+     * @param string $key   token name
+     */
+    public function removePlaceHolder($key)
+    {
+        unset($this->placeHolders[$key]);
     }
 
     /**
@@ -369,7 +437,12 @@ class WebApiContext implements ApiClientAwareContext
         }
     }
 
-    private function sendRequest($method, $url, $options)
+    /**
+     * @param string $method
+     * @param string $url
+     * @param array $options
+     */
+    protected function sendRequest($method, $url, $options)
     {
         $this->requestData = array(
             'method'    => $method,
@@ -387,6 +460,9 @@ class WebApiContext implements ApiClientAwareContext
         }
     }
 
+    /**
+     * @return ClientInterface
+     */
     private function getClient()
     {
         if (null === $this->client) {
@@ -394,5 +470,18 @@ class WebApiContext implements ApiClientAwareContext
         }
 
         return $this->client;
+    }
+
+    /**
+     * @return Response
+     * @throws \Exception
+     */
+    protected function getResponse()
+    {
+        if (null === $this->response) {
+            throw new \Exception("You must first make a request to check a response.");
+        }
+
+        return $this->response;
     }
 }
