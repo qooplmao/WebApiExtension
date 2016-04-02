@@ -12,7 +12,7 @@ namespace Behat\WebApiExtension\Context;
 
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
-use Coduo\PHPMatcher\PHPUnit\PHPMatcherAssertions;
+use Behat\WebApiExtension\PHPMatcher\PHPUnit\PHPMatcherAssertions;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Response;
