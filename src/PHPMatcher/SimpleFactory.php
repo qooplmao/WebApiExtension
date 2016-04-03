@@ -2,9 +2,12 @@
 
 namespace Behat\WebApiExtension\PHPMatcher;
 
+use Behat\WebApiExtension\PHPMatcher\Matcher\Pattern\Expander\Length;
 use Behat\WebApiExtension\PHPMatcher\Matcher\UUIDMatcher;
 use Coduo\PHPMatcher\Factory\SimpleFactory as BaseSimpleFactory;
+use Coduo\PHPMatcher\Lexer;
 use Coduo\PHPMatcher\Matcher;
+use Coduo\PHPMatcher\Parser;
 
 class SimpleFactory extends BaseSimpleFactory
 {
@@ -28,5 +31,17 @@ class SimpleFactory extends BaseSimpleFactory
             new Matcher\ScalarMatcher(),
             new Matcher\WildcardMatcher()
         ));
+    }
+
+    /**
+     * @return Parser
+     */
+    protected function buildParser()
+    {
+        $expanderInitializer = new Parser\ExpanderInitializer();
+
+        $expanderInitializer->setExpanderDefinition('length', Length::class);
+
+        return new Parser(new Lexer(), $expanderInitializer);
     }
 }
