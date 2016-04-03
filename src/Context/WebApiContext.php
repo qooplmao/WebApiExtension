@@ -80,6 +80,16 @@ class WebApiContext implements ApiClientAwareContext
     }
 
     /**
+     * Set authorization string
+     *
+     * @param string|null $authorization
+     */
+    public function setAuthorization($authorization = null)
+    {
+        $this->authorization = $authorization;
+    }
+
+    /**
      * Get authorization string
      *
      * @return string|null
