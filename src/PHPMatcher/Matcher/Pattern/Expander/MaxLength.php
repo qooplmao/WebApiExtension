@@ -5,7 +5,7 @@ namespace Behat\WebApiExtension\PHPMatcher\Matcher\Pattern\Expander;
 use Coduo\PHPMatcher\Matcher\Pattern\PatternExpander;
 use Coduo\ToString\StringConverter;
 
-final class Length implements PatternExpander
+final class MaxLength implements PatternExpander
 {
     /**
      * @var null|string
@@ -15,24 +15,14 @@ final class Length implements PatternExpander
     /**
      * @var integer
      */
-    private $min;
-
-    /**
-     * @var integer
-     */
     private $max;
 
     /**
-     * @param int $min
-     * @param int|null $max
+     * @param int $max
      */
-    public function __construct($min, $max = null)
+    public function __construct($max)
     {
-        $this->min = (int) $min;
-
-        if (null !== $max) {
-            $this->max = (int) $max;
-        }
+        $this->max = $max;
     }
 
     /**
@@ -41,11 +31,6 @@ final class Length implements PatternExpander
      */
     public function match($value)
     {
-        if (null !== $this->max && $this->max < $this->min) {
-            $this->error = sprintf("Length expander requires \"min\" to be less than \"max\", min is \"%s\" but max is \"%s\".", new StringConverter($this->min), new StringConverter($this->max));
-            return false;
-        }
-
         if (!is_array($value) && !is_string($value)) {
             $this->error = sprintf("Length expander requires \"array\" or \"string\", got \"%s\".", new StringConverter($value));
             return false;
@@ -80,25 +65,10 @@ final class Length implements PatternExpander
     {
         $length = strlen($value);
 
-        if (null === $this->max && $this->min !== $length) {
+        if ($this->max < $length) {
             $this->error = sprintf(
-                "%s isn't \"%s\" characters long.",
+                "%s is more than \"%s\" characters long.",
                 new StringConverter($value),
-                new StringConverter($this->min)
-            );
-
-            return false;
-        }
-
-        if (null === $this->max) {
-            return true;
-        }
-
-        if ($this->min > $length || $this->max < $length) {
-            $this->error = sprintf(
-                "%s isn't between \"%s\" and \"%s\" characters long.",
-                new StringConverter($value),
-                new StringConverter($this->min),
                 new StringConverter($this->max)
             );
 
@@ -118,25 +88,10 @@ final class Length implements PatternExpander
     {
         $count = count($value);
 
-        if (null === $this->max && $this->min !== $count) {
+        if ($this->max < $count) {
             $this->error = sprintf(
-                "%s doesn't have \"%s\" elements.",
+                "%s has more than \"%s\" elements.",
                 new StringConverter($value),
-                new StringConverter($this->min)
-            );
-
-            return false;
-        }
-
-        if (null === $this->max) {
-            return true;
-        }
-
-        if ($this->min > $count || $this->max < $count) {
-            $this->error = sprintf(
-                "%s doesn't have between \"%s\" and \"%s\" elements.",
-                new StringConverter($value),
-                new StringConverter($this->min),
                 new StringConverter($this->max)
             );
 

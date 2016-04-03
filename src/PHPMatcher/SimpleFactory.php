@@ -3,6 +3,8 @@
 namespace Behat\WebApiExtension\PHPMatcher;
 
 use Behat\WebApiExtension\PHPMatcher\Matcher\Pattern\Expander\Length;
+use Behat\WebApiExtension\PHPMatcher\Matcher\Pattern\Expander\MaxLength;
+use Behat\WebApiExtension\PHPMatcher\Matcher\Pattern\Expander\MinLength;
 use Behat\WebApiExtension\PHPMatcher\Matcher\UUIDMatcher;
 use Coduo\PHPMatcher\Factory\SimpleFactory as BaseSimpleFactory;
 use Coduo\PHPMatcher\Lexer;
@@ -41,6 +43,8 @@ class SimpleFactory extends BaseSimpleFactory
         $expanderInitializer = new Parser\ExpanderInitializer();
 
         $expanderInitializer->setExpanderDefinition('length', Length::class);
+        $expanderInitializer->setExpanderDefinition('minLength', MinLength::class);
+        $expanderInitializer->setExpanderDefinition('maxLength', MaxLength::class);
 
         return new Parser(new Lexer(), $expanderInitializer);
     }
