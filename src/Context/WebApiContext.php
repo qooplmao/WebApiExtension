@@ -306,26 +306,6 @@ class WebApiContext implements ApiClientAwareContext
     }
 
     /**
-     * Checks that response body contains JSON from PyString.
-     *
-     * Do not check that the response body /only/ contains the JSON from PyString,
-     *
-     * @param string|integer $key
-     * @param integer $length
-     *
-     * @throws \RuntimeException
-     *
-     * @Then /^(?:the )?response should contain json with key "([^"]*)" and value of array with length "([0-9]+)"$/
-     */
-    public function theResponseShouldContainJsonWithKeyAndValueOfArrayWithLength($key, $length)
-    {
-        $actual = json_decode((string) $this->getResponse()->getBody(), true);
-
-        Assertions::assertArrayHasKey($key, $actual);
-        Assertions::assertCount($length, $actual[$key]);
-    }
-
-    /**
      * @Then the response should be json
      */
     public function theResponseIsJson()
