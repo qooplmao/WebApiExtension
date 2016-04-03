@@ -32,7 +32,7 @@ class WebApiContext implements ApiClientAwareContext
     /**
      * @var string
      */
-    protected $authorization;
+    private $authorization;
 
     /**
      * @var ClientInterface
@@ -77,6 +77,16 @@ class WebApiContext implements ApiClientAwareContext
         $this->removeHeader('Authorization');
         $this->authorization = base64_encode($username . ':' . $password);
         $this->addHeader('Authorization', $this->authorizationPrefix .' ' . $this->authorization);
+    }
+
+    /**
+     * Get authorization string
+     *
+     * @return string|null
+     */
+    public function getAuthorization()
+    {
+        return $this->authorization;
     }
 
     /**
