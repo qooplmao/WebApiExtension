@@ -93,6 +93,29 @@ class WebApiContext implements ApiClientAwareContext
     }
 
     /**
+     * Checks that response has header with value
+     *
+     * @param string $name
+     * @param string $value
+     *
+     * @throws \Exception
+     *
+     * @Then /^(?:the )?response should have header "([^"]*)" with value "([^"]*)"$/
+     */
+    public function theResponseShouldHaveHeaderWithValue($name, $value)
+    {
+        Assertions::assertArrayHasKey($name, array_change_key_case($this->getResponse()->getHeaders()));
+
+        $header = $this->getResponse()->getHeader($name);
+
+        if (!is_array($header)) {
+            $header = array($header);
+        }
+
+        Assertions::assertContains($value, $header);
+    }
+
+    /**
      * Sends HTTP request to specific relative URL.
      *
      * @param string $method request method
