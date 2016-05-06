@@ -296,16 +296,10 @@ class WebApiContext implements ApiClientAwareContext
      */
     public function theResponseShouldContainJsonMatching(PyStringNode $jsonString)
     {
-        $etalon = json_decode($this->replacePlaceHolder($jsonString->getRaw()), true);
-        $actual = json_decode((string) $this->getResponse()->getBody(), true);
-
-        if (null === $etalon) {
-            throw new \RuntimeException(
-                "Can not convert etalon to json:\n" . $this->replacePlaceHolder($jsonString->getRaw())
-            );
-        }
-
-        $this->assertMatchesPattern($etalon, $actual);
+        $this->assertMatchesPattern(
+            json_decode($this->replacePlaceHolder($jsonString->getRaw()), true),
+            json_decode((string) $this->getResponse()->getBody(), true)
+        );
     }
 
     /**
