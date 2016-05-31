@@ -213,16 +213,6 @@ class WebApiContext implements ApiClientAwareContext
     }
 
     /**
-     * Helper step: prints the response to the console window
-     *
-     * @Then /^(?:the )?response is printed$/
-     */
-    public function theResponseIsPrinted()
-    {
-        echo (string) $this->getResponse()->getBody();
-    }
-
-    /**
      * Checks that response has specific status code.
      *
      * @param string $code status code
